@@ -103,8 +103,6 @@ def show(rectangles, img = None):
             img = np.array(sct.grab(monitor))
     for (x, y, w, h) in rectangles:
         cv2.rectangle(img, (x, y), (x + w, y + h), (255,255,255,255), 2)
-
-    # cv2.rectangle(img, (result[0], result[1]), (result[0] + result[2], result[1] + result[3]), (255,50,255), 2)
     cv2.imshow('img',img)
     cv2.waitKey(0)
 
@@ -112,7 +110,6 @@ def clickBtn(img,name=None, timeout=3, threshold = ct['default']):
     logger(None, progress_indicator=True)
     if not name is None:
         pass
-        # print('waiting for "{}" button, timeout of {}s'.format(name, timeout))
     start = time.time()
     while(True):
         matches = positions(img, threshold=threshold)
@@ -187,7 +184,6 @@ def isHome(hero, buttons):
         isBelow = y < (button_y + button_h)
         isAbove = y > (button_y - button_h)
         if isBelow and isAbove:
-            # if send-home button exists, the hero is not home
             return False
     return True
 
@@ -202,22 +198,17 @@ def isWorking(bar, buttons):
     return True
 
 def clickGreenBarButtons():
-    # ele clicka nos q tao trabaiano mas axo q n importa
     offset = 150
     green_bars = positions(images['green-bar'], threshold=ct['green_bar'])
-    logger('🟩 %d green bars detected' % len(green_bars))
     buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
     logger('🆗 %d buttons detected' % len(buttons))
-
 
     not_working_green_bars = []
     for bar in green_bars:
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('🆗 %d buttons with green bar detected' % len(not_working_green_bars))
         logger('👆 Clicking in %d heroes' % len(not_working_green_bars))
-
     for (x, y, w, h) in not_working_green_bars:
         moveToWithRandomness(x+offset+(w/2),y+(h/2),1)
         pyautogui.click()
@@ -232,6 +223,7 @@ def clickFullBarButtons():
     offset = 100
     full_bars = positions(images['full-stamina'], threshold=ct['default'])
     buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
+    logger('🆗 %d buttons detected' % len(buttons))
 
     not_working_full_bars = []
     for bar in full_bars:
@@ -338,7 +330,7 @@ def refreshHeroes():
     while(empty_scrolls_attempts >0):
         if c['select_heroes_mode'] == 'full':
             buttonsClicked = clickFullBarButtons()
-        elif c['select_heroes_mode'] == 'green':
+        if c['select_heroes_mode'] == 'green':
             buttonsClicked = clickGreenBarButtons()
         else:
             buttonsClicked = clickButtons()
@@ -353,11 +345,9 @@ def refreshHeroes():
 
 
 def main():
-    time.sleep(20)
+    time.sleep(5)
     t = c['time_intervals']
-    
-    windows = [10]
-
+    windows = []
     for w in pygetwindow.getWindowsWithTitle('bombcrypto'):
         windows.append({
             "window": w,
@@ -372,7 +362,9 @@ def main():
 
         for last in windows:
             last["window"].activate()
-            time.sleep(5)
+            if clickBtn(images['ok'], name='okBtn', timeout=5):
+                pass
+                time.sleep(10)
 
             if now - last["login"] > addRandomness(t['check_for_login'] * 60):
                 sys.stdout.flush()
@@ -380,29 +372,22 @@ def main():
                 login()
                 time.sleep(10)
                 goToGame()
-                time.sleep(20)
+                time.sleep(10)
 
                 if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
                     last["heroes"] = now
                     refreshHeroes()
-                time.sleep(20)
+                time.sleep(10)
 
                 if now - last["new_map"] > t['check_for_new_map_button']:
                     last["new_map"] = now
-                time.sleep(20)
-
-                if clickBtn(images['new-map']):
-                    loggerMapClicked()
-                time.sleep(30)
-
-                for last in windows:
-                    last["window"].activate()
-                    time.sleep(5)
+                    login()
+                    time.sleep(10)
+                    goToGame()
+                    time.sleep(10)
 
             logger(None, progress_indicator=True)
-
             sys.stdout.flush()
-
-            time.sleep(10)
+            time.sleep(5)
             
 main()
