@@ -319,7 +319,7 @@ def refreshHeroes():
 
     if c['select_heroes_mode'] == "full":
         logger('⚒️ Sending heroes with full stamina bar to work', 'green')
-    elif c['select_heroes_mode'] == "green":
+    if c['select_heroes_mode'] == "green":
         logger('⚒️ Sending heroes with green stamina bar to work', 'green')
     else:
         logger('⚒️ Sending all heroes to work', 'green')
@@ -362,6 +362,7 @@ def main():
 
         for last in windows:
             last["window"].activate()
+            time.sleep(5)
             if clickBtn(images['ok'], name='okBtn', timeout=5):
                 pass
                 time.sleep(10)
@@ -370,21 +371,17 @@ def main():
                 sys.stdout.flush()
                 last["login"] = now
                 login()
-                time.sleep(10)
                 goToGame()
-                time.sleep(10)
+                time.sleep(15)
 
                 if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
                     last["heroes"] = now
                     refreshHeroes()
-                time.sleep(10)
+                time.sleep(15)
 
                 if now - last["new_map"] > t['check_for_new_map_button']:
                     last["new_map"] = now
-                    login()
-                    time.sleep(10)
-                    goToGame()
-                    time.sleep(10)
+                    time.sleep(5)
 
             logger(None, progress_indicator=True)
             sys.stdout.flush()
