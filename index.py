@@ -201,14 +201,14 @@ def clickGreenBarButtons():
     offset = 150
     green_bars = positions(images['green-bar'], threshold=ct['green_bar'])
     buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
-    logger('🆗 %d buttons detected' % len(buttons))
+    logger('🆗 %d BUTÂO GREEN DETECTADO' % len(buttons))
 
     not_working_green_bars = []
     for bar in green_bars:
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('👆 Clicking in %d heroes' % len(not_working_green_bars))
+        logger('👆 CLICADO EM %d heroes' % len(not_working_green_bars))
     for (x, y, w, h) in not_working_green_bars:
         moveToWithRandomness(x+offset+(w/2),y+(h/2),1)
         pyautogui.click()
@@ -223,7 +223,7 @@ def clickFullBarButtons():
     offset = 100
     full_bars = positions(images['full-stamina'], threshold=ct['default'])
     buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
-    logger('🆗 %d buttons detected' % len(buttons))
+    logger('🆗 %d BUTÂO FULL DETECTADO' % len(buttons))
 
     not_working_full_bars = []
     for bar in full_bars:
@@ -231,7 +231,7 @@ def clickFullBarButtons():
             not_working_full_bars.append(bar)
 
     if len(not_working_full_bars) > 0:
-        logger('👆 Clicking in %d heroes' % len(not_working_full_bars))
+        logger('👆 CLICADO EM %d heroes' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
         moveToWithRandomness(x+offset+(w/2),y+(h/2),1)
@@ -248,30 +248,30 @@ def goToHeroes():
     clickBtn(images['hero-icon'])
 
 def goToGame():
-    # in case of server overload popup
+    logger('🔃 ENVIANDO PARA O MAPA')
     clickBtn(images['x'])
     clickBtn(images['x'])
     clickBtn(images['treasure-hunt-icon'])
 
 def refreshHeroesPositions():
 
-    logger('🔃 Refreshing Heroes Positions')
+    logger('RETORNO AO MENU DO GAME')
     clickBtn(images['go-back-arrow'])
     clickBtn(images['treasure-hunt-icon'])
     clickBtn(images['treasure-hunt-icon'])
 
 def login():
     global login_attempts
-    logger('😿 Checking if game has disconnected')
+    logger('CHECANDO SE A CONTA SE ENCONTRA DESCONECTADA ...capitalize()')
 
     if login_attempts > 3:
-        logger('🔃 Too many login attempts, refreshing')
+        logger('RELOAD DA PAGINA ...')
         login_attempts = 0
         pyautogui.hotkey('ctrl','f5')
         return
 
     if clickBtn(images['connect-game'], name='connectWalletBtn', timeout = 10):
-        logger('🎉 Connect wallet button detected, logging in!')
+        logger('REALIZANDO LOGIN NO GAME')
         login_attempts = login_attempts + 1
         if clickBtn(images['connect-login'], name='connectLoginBtn', timeout=5):
             login_attempts = login_attempts + 1
@@ -313,16 +313,16 @@ def sendHeroesHome():
             print('hero already home, or home full(no dark home button)')
 
 def refreshHeroes():
-    logger('🏢 Search for heroes to work')
+    logger('INICIANDO PROCURA DE TRABALHADORES ...')
 
     goToHeroes()
 
     if c['select_heroes_mode'] == "full":
-        logger('⚒️ Sending heroes with full stamina bar to work', 'green')
-    if c['select_heroes_mode'] == "green":
-        logger('⚒️ Sending heroes with green stamina bar to work', 'green')
+        logger('ENVIANDO HEROS COM ESTAMINA FULL PARA TRABALHAR', 'green')
+    elif c['select_heroes_mode'] == "green":
+        logger('ENVIANDO HEROS COM ESTAMINA GREEN PARA TRABALHAR', 'green')
     else:
-        logger('⚒️ Sending all heroes to work', 'green')
+        logger('ENVIANDO HEROS COM ESTAMINA PARA TRABALHAR', 'green')
 
     buttonsClicked = 1
     empty_scrolls_attempts = c['scroll_attemps']
@@ -330,17 +330,22 @@ def refreshHeroes():
     while(empty_scrolls_attempts >0):
         if c['select_heroes_mode'] == 'full':
             buttonsClicked = clickFullBarButtons()
-        if c['select_heroes_mode'] == 'green':
+            sendHeroesHome()
+            if buttonsClicked == 0:
+                empty_scrolls_attempts = empty_scrolls_attempts - 1
+            scroll()
+        elif c['select_heroes_mode'] == 'green':
             buttonsClicked = clickGreenBarButtons()
+            sendHeroesHome()
+            if buttonsClicked == 0:
+                empty_scrolls_attempts = empty_scrolls_attempts - 1
+            scroll()
         else:
             buttonsClicked = clickButtons()
-
-        sendHeroesHome()
-
-        if buttonsClicked == 0:
-            empty_scrolls_attempts = empty_scrolls_attempts - 1
-        scroll()
-    logger('💪 {} heroes sent to work'.format(hero_clicks))
+            sendHeroesHome()
+            if buttonsClicked == 0:
+                empty_scrolls_attempts = empty_scrolls_attempts - 1
+            scroll()
     goToGame()
 
 
@@ -372,12 +377,12 @@ def main():
                 last["login"] = now
                 login()
                 goToGame()
-                time.sleep(15)
+                time.sleep(10)
 
                 if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
                     last["heroes"] = now
                     refreshHeroes()
-                time.sleep(15)
+                time.sleep(10)
 
                 if now - last["new_map"] > t['check_for_new_map_button']:
                     last["new_map"] = now
