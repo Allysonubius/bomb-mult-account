@@ -249,15 +249,13 @@ def goToHeroes():
 
 def goToGame():
     logger('🔃 ENVIANDO PARA O MAPA')
-    clickBtn(images['x'])
-    clickBtn(images['x'])
-    clickBtn(images['treasure-hunt-icon'])
+    clickBtn(images['x'],timeout=5)
+    clickBtn(images['treasure-hunt-icon'],timeout=5)
 
 def refreshHeroesPositions():
 
     logger('RETORNO AO MENU DO GAME')
     clickBtn(images['go-back-arrow'])
-    clickBtn(images['treasure-hunt-icon'])
     clickBtn(images['treasure-hunt-icon'])
 
 def login():
@@ -350,7 +348,7 @@ def refreshHeroes():
 
 
 def main():
-    time.sleep(5)
+    time.sleep(10)
     t = c['time_intervals']
     windows = []
     for w in pygetwindow.getWindowsWithTitle('bombcrypto'):
@@ -367,8 +365,8 @@ def main():
 
         for last in windows:
             last["window"].activate()
-            time.sleep(5)
-            if clickBtn(images['ok'], name='okBtn', timeout=5):
+            time.sleep(10)
+            if clickBtn(images['ok'], name='okBtn', timeout=10):
                 pass
                 time.sleep(10)
 
@@ -377,19 +375,19 @@ def main():
                 last["login"] = now
                 login()
                 goToGame()
-                time.sleep(10)
+                time.sleep(20)
 
                 if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
                     last["heroes"] = now
                     refreshHeroes()
-                time.sleep(10)
+                time.sleep(20)
 
                 if now - last["new_map"] > t['check_for_new_map_button']:
                     last["new_map"] = now
-                    time.sleep(5)
+                    time.sleep(20)
 
             logger(None, progress_indicator=True)
             sys.stdout.flush()
-            time.sleep(5)
+            time.sleep(10)
             
 main()
