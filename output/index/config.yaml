@@ -93,14 +93,14 @@
   #
   # [pt_BR]
   # Valor padrão: 60
-  scroll_size: 35
+  scroll_size: 25
 
 # [en_US]
   # Default value: 3
   #
   # [pt_BR]
   # Valor padrão: 3
-  scroll_attemps: 3
+  scroll_attemps: 4
 
   # [en_US]
   # Default value: true

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-    
+from socket import timeout
 from cv2 import cv2
 from os import listdir
 from src.logger import logger, loggerMapClicked
@@ -198,10 +199,9 @@ def isWorking(bar, buttons):
     return True
 
 def clickGreenBarButtons():
-    offset = 150
+    offset = 130
     green_bars = positions(images['green-bar'], threshold=ct['green_bar'])
     buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
-    logger('🆗 %d BUTÂO GREEN DETECTADO' % len(buttons))
 
     not_working_green_bars = []
     for bar in green_bars:
@@ -242,6 +242,7 @@ def clickFullBarButtons():
     return len(not_working_full_bars)
 
 def goToHeroes():
+    logger('PROCURANDO NOVOS HEROS PARA TRABALHAR')
     if clickBtn(images['go-back-arrow']):
         global login_attempts
         login_attempts = 0
@@ -253,14 +254,13 @@ def goToGame():
     clickBtn(images['treasure-hunt-icon'],timeout=5)
 
 def refreshHeroesPositions():
-
     logger('RETORNO AO MENU DO GAME')
     clickBtn(images['go-back-arrow'])
     clickBtn(images['treasure-hunt-icon'])
 
 def login():
     global login_attempts
-    logger('CHECANDO SE A CONTA SE ENCONTRA DESCONECTADA ...capitalize()')
+    logger('CHECANDO SE A CONTA SE ENCONTRA DESCONECTADA ...')
 
     if login_attempts > 3:
         logger('RELOAD DA PAGINA ...')
@@ -271,10 +271,10 @@ def login():
     if clickBtn(images['connect-game'], name='connectWalletBtn', timeout = 10):
         logger('REALIZANDO LOGIN NO GAME')
         login_attempts = login_attempts + 1
-        if clickBtn(images['connect-login'], name='connectLoginBtn', timeout=5):
+        if clickBtn(images['connect-login'], name='connectLoginBtn', timeout=10):
             login_attempts = login_attempts + 1
 
-    if clickBtn(images['ok'], name='okBtn', timeout=5):
+    if clickBtn(images['ok'], name='okBtn', timeout=10):
         pass
 
 def sendHeroesHome():
@@ -284,7 +284,6 @@ def sendHeroesHome():
     for hero in home_heroes:
         hero_positions = positions(hero, threshold=ch['hero_threshold'])
         if not len (hero_positions) == 0:
-            #TODO maybe pick up match with most wheight instead of first
             hero_position = hero_positions[0]
             heroes_positions.append(hero_position)
 
@@ -293,9 +292,7 @@ def sendHeroesHome():
         print('No heroes that should be sent home found.')
         return
     print(' %d heroes that should be sent home found' % n)
-    # if send-home button exists, the hero is not home
     go_home_buttons = positions(images['send-home'], threshold=ch['home_button_threshold'])
-    # TODO pass it as an argument for both this and the other function that uses it
     go_work_buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
 
     for position in heroes_positions:
@@ -348,7 +345,7 @@ def refreshHeroes():
 
 
 def main():
-    time.sleep(10)
+    time.sleep(3)
     t = c['time_intervals']
     windows = []
     for w in pygetwindow.getWindowsWithTitle('bombcrypto'):
@@ -365,26 +362,26 @@ def main():
 
         for last in windows:
             last["window"].activate()
-            time.sleep(10)
+            timeout(5)
             if clickBtn(images['ok'], name='okBtn', timeout=10):
                 pass
-                time.sleep(10)
+                timeout(5)
 
             if now - last["login"] > addRandomness(t['check_for_login'] * 60):
                 sys.stdout.flush()
                 last["login"] = now
                 login()
                 goToGame()
-                time.sleep(20)
+                time.sleep(25)
 
                 if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
                     last["heroes"] = now
                     refreshHeroes()
-                time.sleep(20)
+                    timeout(10)
 
                 if now - last["new_map"] > t['check_for_new_map_button']:
                     last["new_map"] = now
-                    time.sleep(20)
+                    timeout(10)
 
             logger(None, progress_indicator=True)
             sys.stdout.flush()
